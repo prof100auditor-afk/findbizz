@@ -17,7 +17,10 @@ SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 SHEET_NAME     = os.environ.get("SHEET_NAME", "Заявки")
 
 SHEET_GID = os.environ.get("SHEET_GID", "0")
-CSV_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={SHEET_GID}"
+CSV_URL = os.environ.get(
+    "CSV_URL",
+    f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={SHEET_GID}"
+)
 
 ai = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
