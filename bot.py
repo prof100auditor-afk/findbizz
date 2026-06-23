@@ -17,6 +17,8 @@ SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 SHEET_NAME     = os.environ.get("SHEET_NAME", "Заявки")
 
 SHEET_GID = os.environ.get("SHEET_GID", "0")
+APPS_SCRIPT_URL = os.environ.get("APPS_SCRIPT_URL", "")
+APPS_SCRIPT_KEY = os.environ.get("APPS_SCRIPT_KEY", "findbizz2026")
 CSV_URL = os.environ.get(
     "CSV_URL",
     f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={SHEET_GID}"
@@ -46,12 +48,24 @@ sessions: dict = {}
 async def fetch_rows() -> list[dict]:
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
+            if APPS_SCRIPT_URL:
+                # Используем Apps Script как прокси
+                url = f"{APPS_SCRIPT_URL}?key={APPS_SCRIPT_KEY}"
+                r = await client.get(url, timeout=30)
+                logger.info(f"Apps Script response: {r.status_code}")
+                if r.status_code == 200 and r.text.strip() != "Unauthorized":
+                    import json as _json
+                    rows = _json.loads(r.text)
+                    rows = [row for row in rows if row.get("Название компании", "").strip()]
+                    logger.info(f"Loaded {len(rows)} rows via Apps Script")
+                    return rows
+            # Fallback to CSV
             r = await client.get(CSV_URL, timeout=20)
             if r.status_code != 200:
                 return []
             reader = csv.DictReader(io.StringIO(r.text))
             rows = [dict(row) for row in reader if row.get("Название компании", "").strip()]
-            logger.info(f"Loaded {len(rows)} rows")
+            logger.info(f"Loaded {len(rows)} rows via CSV")
             return rows
     except Exception as e:
         logger.error(f"Fetch error: {e}")
