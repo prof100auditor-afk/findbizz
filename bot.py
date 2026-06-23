@@ -17,7 +17,7 @@ SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 SHEET_NAME     = os.environ.get("SHEET_NAME", "Заявки")
 
 SHEET_GID = os.environ.get("SHEET_GID", "0")
-APPS_SCRIPT_URL = os.environ.get("APPS_SCRIPT_URL", "")
+APPS_SCRIPT_URL = os.environ.get("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbw2J0POpkKjE4SDfEyvmvBlY_ThuoBFbs6A27CsNeVv0wplN4khBzc7DNvurDmBJbOjrQ/exec")
 APPS_SCRIPT_KEY = os.environ.get("APPS_SCRIPT_KEY", "findbizz2026")
 CSV_URL = os.environ.get(
     "CSV_URL",
