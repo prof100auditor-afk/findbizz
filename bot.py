@@ -74,6 +74,17 @@ async def fetch_rows() -> list[dict]:
 def safe_str(val) -> str:
     if val is None:
         return ""
+    if isinstance(val, float):
+        # Конвертируем числа: 0.22 -> "22%", 17.0 -> "17%", 3.0 -> "3"
+        if val != int(val):
+            # Дробное — скорее всего НДС в виде 0.22
+            pct = round(val * 100)
+            return f"{pct}%"
+        else:
+            # Целое число
+            return str(int(val))
+    if isinstance(val, int):
+        return str(val)
     return str(val).strip()
 
 def format_rows_compact(rows: list[dict]) -> str:
