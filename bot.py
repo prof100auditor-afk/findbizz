@@ -56,7 +56,7 @@ async def fetch_rows() -> list[dict]:
                 if r.status_code == 200 and r.text.strip() != "Unauthorized":
                     import json as _json
                     rows = _json.loads(r.text)
-                    rows = [row for row in rows if row.get("Название компании", "").strip()]
+                    rows = [row for row in rows if safe_str(row.get("Название компании", ""))]
                     logger.info(f"Loaded {len(rows)} rows via Apps Script")
                     return rows
             # Fallback to CSV
@@ -71,18 +71,23 @@ async def fetch_rows() -> list[dict]:
         logger.error(f"Fetch error: {e}")
         return []
 
+def safe_str(val) -> str:
+    if val is None:
+        return ""
+    return str(val).strip()
+
 def format_rows_compact(rows: list[dict]) -> str:
     lines = []
     for i, row in enumerate(rows, 1):
-        company = row.get("Название компании", "").strip()
-        purpose = row.get("Назначение платежа", "").strip()
-        bank    = row.get("Банк", "").strip()
-        amount  = row.get("Сумма ОТ и ДО", "").strip()
-        vat     = row.get("Ставка НДС", "").strip()
-        cash    = row.get("Ставка по кэшу", "").strip()
-        zsk     = row.get("Цвет ЗСК", "").strip()
-        accepts = row.get("Принимает от", "").strip()
-        issue   = row.get("Дата выдачи/срок", "").strip()
+        company = safe_str(row.get("Название компании", ""))
+        purpose = safe_str(row.get("Назначение платежа", ""))
+        bank    = safe_str(row.get("Банк", ""))
+        amount  = safe_str(row.get("Сумма ОТ и ДО", ""))
+        vat     = safe_str(row.get("Ставка НДС", ""))
+        cash    = safe_str(row.get("Ставка по кэшу", ""))
+        zsk     = safe_str(row.get("Цвет ЗСК", ""))
+        accepts = safe_str(row.get("Принимает от", ""))
+        issue   = safe_str(row.get("Дата выдачи/срок", ""))
         lines.append(f"{i}. {company} | {purpose} | {bank} | {amount} | НДС:{vat} | Кэш:{cash} | ЗСК:{zsk} | Принимает:{accepts} | Срок:{issue}")
     return "\n".join(lines)
 
@@ -146,7 +151,7 @@ def format_company_card(row: dict, index: int, markup: float = 0) -> str:
     amount       = row.get("Сумма ОТ и ДО", "")
     bank         = row.get("Банк", "")
     vat          = row.get("Ставка НДС", "")
-    cash_raw     = row.get("Ставка по кэшу", "").strip()
+    cash_raw     = safe_str(row.get("Ставка по кэшу", ""))
     issue        = row.get("Дата выдачи/срок", "")
     comment      = row.get("Комментарии", "")
 
