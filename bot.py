@@ -260,8 +260,8 @@ async def handle_markup(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f"Send error: {e}")
             await query.message.reply_text(card)
 
-        cash_raw = row.get("Ставка по кэшу", "").strip()
-        source = row.get("Источник (группа)", "").strip()
+        cash_raw = safe_str(row.get("Ставка по кэшу", ""))
+        source = safe_str(row.get("Источник (группа)", ""))
         if markup > 0 and cash_raw:
             breakdown = make_breakdown(cash_raw, markup, source)
         elif source:
